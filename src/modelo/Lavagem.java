@@ -6,9 +6,7 @@ import java.util.List;
 import java.util.UUID;
 import java.time.LocalDate;
 
-/**
- * Representa um ciclo de lavagem, contendo uma lista de itens que foram lavados.
- */
+
 public class Lavagem {
     private final String id;
     private final LocalDate data;

@@ -1,20 +1,20 @@
 package modelo.subclasses.roupasdiaadia;
 
+import modelo.EstadoConservacao;
+import modelo.TamanhoRoupa;
 import modelo.subclasses.LavavelandEmpresta;
 
-// A classe agora é pública e não mais abstrata
 public class Superior extends LavavelandEmpresta {
     
-    private String tipo; // Novo campo para guardar o tipo específico (ex: "Camisa", "Vestido")
+    private String tipo; 
 
-    // O construtor agora recebe o 'tipo'
-    public Superior(String tipo, String nome, String cor, String tamanho, String loja, String conservacao) {
-        super(nome, cor, tamanho, loja, conservacao);
+    public Superior(String tipo, String nome, String cor, TamanhoRoupa tamanho, String loja, EstadoConservacao conservacao) {
+        super(nome, cor, tamanho.getDescricao(), loja, conservacao);
         this.tipo = tipo;
     }
 
     @Override
     public String getTipo() {
-        return this.tipo; // Retorna o tipo que o utilizador definiu
+        return this.tipo; 
     }
 }

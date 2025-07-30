@@ -1,139 +1,151 @@
 package gui;
 
+import modelo.Look;
+import persistencia.LookDAO;
+
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import modelo.Pessoa;
-import modelo.Look;
-import modelo.Item;
+import java.util.List;
 
 public class TelaGerenciarLooks extends JFrame {
+    private static final Color COR_FUNDO = new Color(255, 223, 229);
 
-    private Pessoa pessoa;
+    private LookDAO lookDAO;
     private JTable tabelaLooks;
-    private DefaultTableModel modeloTabela;
-    private JTextArea areaDetalhes;
+    private DefaultTableModel tableModel;
 
-    public TelaGerenciarLooks(Pessoa pessoa) {
-        this.pessoa = pessoa;
+    public TelaGerenciarLooks() {
+        this.lookDAO = new LookDAO();
 
-        setTitle("Gerenciador de Looks");
-        setSize(900, 700);
+        setTitle("Gerenciar Looks");
+        setSize(800, 600);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
+        getContentPane().setBackground(COR_FUNDO);
         setLayout(new BorderLayout(10, 10));
 
-        // Painel principal que vai conter tudo
-        JPanel painelConteudo = new JPanel(new BorderLayout(10, 10));
-        painelConteudo.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        
-        // --- Título ---
-        JLabel lblTitulo = new JLabel("Meus Looks", SwingConstants.CENTER);
-        lblTitulo.setFont(new Font("SansSerif", Font.BOLD, 24));
-        painelConteudo.add(lblTitulo, BorderLayout.NORTH);
-
-        // --- Painel Central com a Tabela e os Detalhes ---
-        JSplitPane painelDividido = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
-        painelDividido.setResizeWeight(0.6); // 60% do espaço para a tabela
-
-        // Tabela de Looks
-        String[] colunas = {"Nome do Look"};
-        modeloTabela = new DefaultTableModel(colunas, 0) {
+        String[] colunas = {"ID", "Nome do Look", "Qtd. Usos"};
+        tableModel = new DefaultTableModel(colunas, 0) {
             @Override
-            public boolean isCellEditable(int row, int column) { return false; }
-        };
-        tabelaLooks = new JTable(modeloTabela);
-        tabelaLooks.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        tabelaLooks.setFont(new Font("SansSerif", Font.PLAIN, 16));
-        tabelaLooks.setRowHeight(30);
-        painelDividido.setTopComponent(new JScrollPane(tabelaLooks));
-
-        // Área de Detalhes
-        areaDetalhes = new JTextArea("Selecione um look para ver os detalhes.");
-        areaDetalhes.setEditable(false);
-        areaDetalhes.setFont(new Font("Monospaced", Font.PLAIN, 14));
-        areaDetalhes.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        painelDividido.setBottomComponent(new JScrollPane(areaDetalhes));
-        
-        painelConteudo.add(painelDividido, BorderLayout.CENTER);
-
-        // --- Painel de Botões ---
-        JPanel painelBotoes = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
-        JButton btnAdicionar = new JButton("Criar Novo Look");
-        JButton btnEditar = new JButton("Editar Look");
-        JButton btnRemover = new JButton("Remover Look");
-        JButton btnVoltar = new JButton("Voltar");
-        
-        painelBotoes.add(btnAdicionar);
-        painelBotoes.add(btnEditar);
-        painelBotoes.add(btnRemover);
-        painelBotoes.add(btnVoltar);
-        painelConteudo.add(painelBotoes, BorderLayout.SOUTH);
-
-        // Adiciona o painel de conteúdo à janela
-        add(painelConteudo);
-        
-        // --- Ações ---
-        btnAdicionar.addActionListener(_ -> {
-            TelaCriarLook telaCriar = new TelaCriarLook(this, pessoa);
-            telaCriar.setVisible(true);
-        });
-        btnEditar.addActionListener(_ -> editarLookSelecionado());
-        btnRemover.addActionListener(_ -> removerLookSelecionado());
-        btnVoltar.addActionListener(_ -> dispose());
-
-        // Listener para atualizar os detalhes quando um look é selecionado
-        tabelaLooks.getSelectionModel().addListSelectionListener(_ -> mostrarDetalhesDoLook());
-        
-        // Atualiza a tabela com os dados iniciais
-        atualizarTabela();
-    }
-
-    private void editarLookSelecionado() {
-        int linhaSelecionada = tabelaLooks.getSelectedRow();
-        if (linhaSelecionada == -1) {
-            JOptionPane.showMessageDialog(this, "Por favor, selecione um look para editar.", "Nenhum look selecionado", JOptionPane.WARNING_MESSAGE);
-            return;
-        }
-        Look lookParaEditar = pessoa.getLooks().get(linhaSelecionada);
-        TelaEditarLook telaEditar = new TelaEditarLook(this, pessoa, lookParaEditar);
-        telaEditar.setVisible(true);
-    }
-
-    private void removerLookSelecionado() {
-        int linhaSelecionada = tabelaLooks.getSelectedRow();
-        if (linhaSelecionada == -1) {
-            JOptionPane.showMessageDialog(this, "Por favor, selecione um look para remover.", "Nenhum look selecionado", JOptionPane.WARNING_MESSAGE);
-            return;
-        }
-        int confirmacao = JOptionPane.showConfirmDialog(this, "Tem certeza que deseja remover o look selecionado?", "Confirmar Remoção", JOptionPane.YES_NO_OPTION);
-        if (confirmacao == JOptionPane.YES_OPTION) {
-            pessoa.removerLook(linhaSelecionada);
-            atualizarTabela();
-            JOptionPane.showMessageDialog(this, "Look removido com sucesso!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
-        }
-    }
-
-    private void mostrarDetalhesDoLook() {
-        int linhaSelecionada = tabelaLooks.getSelectedRow();
-        if (linhaSelecionada != -1) {
-            Look lookSelecionado = pessoa.getLooks().get(linhaSelecionada);
-            StringBuilder detalhes = new StringBuilder("Itens do Look: '" + lookSelecionado.getNome() + "'\n\n");
-            for (Item item : lookSelecionado.listarItensDoLook()) {
-                detalhes.append(String.format("- %s: %s (%s)\n", item.getTipo(), item.getNome(), item.getCor()));
+            public boolean isCellEditable(int row, int column) {
+                return false;
             }
-            areaDetalhes.setText(detalhes.toString());
-        } else {
-            areaDetalhes.setText("Selecione um look para ver os detalhes.");
+        };
+        tabelaLooks = new JTable(tableModel);
+        tabelaLooks.setSelectionMode(ListSelectionModel.SINGLE_SELECTION); 
+        tabelaLooks.setFillsViewportHeight(true);
+        JScrollPane scrollPane = new JScrollPane(tabelaLooks);
+        add(scrollPane, BorderLayout.CENTER);
+
+        JPanel painelBotoes = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
+        painelBotoes.setBackground(COR_FUNDO);
+
+        JButton btnCriar = new JButton("criar Novo Look");
+        btnCriar.addActionListener(new java.awt.event.ActionListener() {
+            @Override
+            public void actionPerformed(java.awt.event.ActionEvent e) {
+                TelaCriarLook telaCriar = new TelaCriarLook(TelaGerenciarLooks.this);
+                telaCriar.setVisible(true);
+                carregarLooks();
+            }
+        });
+        painelBotoes.add(btnCriar);
+
+        JButton btnEditar = new JButton("editar Look Selecionado");
+        btnEditar.addActionListener(new java.awt.event.ActionListener() {
+            @Override
+            public void actionPerformed(java.awt.event.ActionEvent e) {
+                int selectedRow = tabelaLooks.getSelectedRow();
+                if (selectedRow >= 0) {
+                    int lookId = (int) tableModel.getValueAt(selectedRow, 0);
+                    Look lookParaEditar = buscarLookPorId(lookId);
+                    if (lookParaEditar != null) {
+                        TelaEditarLook telaEditar = new TelaEditarLook(TelaGerenciarLooks.this, lookParaEditar);
+                        telaEditar.setVisible(true);
+                        carregarLooks();
+                    } else {
+                        JOptionPane.showMessageDialog(TelaGerenciarLooks.this, "Erro ao carregar look para edição.", "", JOptionPane.ERROR_MESSAGE);
+                    }
+                } else {
+                    JOptionPane.showMessageDialog(TelaGerenciarLooks.this, "Selecione um look para editar.", "", JOptionPane.WARNING_MESSAGE);
+                }
+            }
+        });
+        painelBotoes.add(btnEditar);
+
+        JButton btnRemover = new JButton("Remover Look Selecionado");
+        btnRemover.addActionListener(new java.awt.event.ActionListener() {
+            @Override
+            public void actionPerformed(java.awt.event.ActionEvent e) {
+                int selectedRow = tabelaLooks.getSelectedRow();
+                if (selectedRow >= 0) {
+                    int confirm = JOptionPane.showConfirmDialog(TelaGerenciarLooks.this,
+                            "Tem certeza que deseja remover este look?", "",
+                            JOptionPane.YES_NO_OPTION);
+                    if (confirm == JOptionPane.YES_OPTION) {
+                        int lookId = (int) tableModel.getValueAt(selectedRow, 0);
+                        lookDAO.removerLookPorId(lookId);
+                        JOptionPane.showMessageDialog(TelaGerenciarLooks.this, "Look removido com sucesso!");
+                        carregarLooks();
+                    }
+                } else {
+                    JOptionPane.showMessageDialog(TelaGerenciarLooks.this, "Selecione um look para remover.", "", JOptionPane.WARNING_MESSAGE);
+                }
+            }
+        });
+        painelBotoes.add(btnRemover);
+
+        JButton btnVerHistorico = new JButton("Ver Histórico de Uso");
+        btnVerHistorico.addActionListener(new java.awt.event.ActionListener() {
+            @Override
+            public void actionPerformed(java.awt.event.ActionEvent e) {
+                int selectedRow = tabelaLooks.getSelectedRow();
+                if (selectedRow >= 0) {
+                    int lookId = (int) tableModel.getValueAt(selectedRow, 0);
+                    Look lookSelecionado = buscarLookPorId(lookId);
+                    if (lookSelecionado != null) {
+                        TelaUsoDoLook telaHistorico = new TelaUsoDoLook(TelaGerenciarLooks.this, lookSelecionado); 
+                        telaHistorico.setVisible(true);
+                    } else {
+                        JOptionPane.showMessageDialog(TelaGerenciarLooks.this, "Erro ao carregar histórico do look.", "", JOptionPane.ERROR_MESSAGE);
+                    }
+                } else {
+                    JOptionPane.showMessageDialog(TelaGerenciarLooks.this, "Selecione um look para ver o histórico.", "", JOptionPane.WARNING_MESSAGE);
+                }
+            }
+        });
+        painelBotoes.add(btnVerHistorico);
+
+        JButton btnVoltar = new JButton("Voltar");
+        btnVoltar.addActionListener(new java.awt.event.ActionListener() {
+            @Override
+            public void actionPerformed(java.awt.event.ActionEvent e) {
+                dispose();
+            }
+        });
+        painelBotoes.add(btnVoltar);
+
+        add(painelBotoes, BorderLayout.SOUTH);
+
+        carregarLooks();
+    }
+
+    public void carregarLooks() { 
+        tableModel.setRowCount(0);
+        List<Look> looks = lookDAO.listarTodosLooks();
+        for (Look look : looks) {
+            tableModel.addRow(new Object[]{look.getId(), look.getNome(), look.getTotalUsos()});
         }
     }
 
-    public void atualizarTabela() {
-        modeloTabela.setRowCount(0); // Limpa a tabela
-        for (Look look : pessoa.getLooks()) {
-            modeloTabela.addRow(new Object[]{look.getNome()});
+    private Look buscarLookPorId(int id) {
+        List<Look> todosLooks = lookDAO.listarTodosLooks();
+        for (Look look : todosLooks) {
+            if (look.getId() == id) {
+                return look;
+            }
         }
-        // Limpa a área de detalhes após qualquer atualização
-        mostrarDetalhesDoLook();
+        return null;
     }
 }

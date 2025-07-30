@@ -5,66 +5,67 @@ import java.util.List;
 import modelo.Item;
 import modelo.Look;
 import modelo.interfaces.IEmprestavel;
-import modelo.interfaces.ILavavel;
+import persistencia.ItemDAO; 
+import persistencia.LookDAO;
 
-/**
- * Versão com a lógica original mantida e novas funcionalidades adicionadas.
- */
 public class Estatisticas {
 
-    /**
-     * Mostra uma lista dos itens, começando pelo mais usado.
-     */
-    public void visualizarItensMaisUsados(List<Item> todosOsItens) {
-        List<Item> copiaDaLista = new ArrayList<>(todosOsItens);
-        List<Item> listaOrdenada = new ArrayList<>();
+    private ItemDAO itemDAO;
+    private LookDAO lookDAO;
 
-        while (!copiaDaLista.isEmpty()) {
-            Item itemMaisUsado = copiaDaLista.get(0);
-            for (Item itemAtual : copiaDaLista) {
-                if (itemAtual.getTotalUsos() > itemMaisUsado.getTotalUsos()) {
-                    itemMaisUsado = itemAtual;
+    public Estatisticas() {
+        itemDAO = new ItemDAO();
+        lookDAO = new LookDAO();
+    }
+
+    public void visualizarItensMaisUsados() {
+        List<Item> todosItens = itemDAO.listarTodosItens();
+
+        // isso aqui é [para eu ordenar os itens
+        for (int i = 0; i < todosItens.size() - 1; i++) {
+            for (int j = i + 1; j < todosItens.size(); j++) {
+                if (todosItens.get(j).getTotalUsos() > todosItens.get(i).getTotalUsos()) {
+                    Item temp = todosItens.get(i);
+                    todosItens.set(i, todosItens.get(j));
+                    todosItens.set(j, temp);
                 }
             }
-            listaOrdenada.add(itemMaisUsado);
-            copiaDaLista.remove(itemMaisUsado);
         }
-        
-        System.out.println("--- Itens por Ordem de Utilização ---");
-        for(Item item : listaOrdenada) {
+
+        System.out.println("\n============================");
+        System.out.println("      ITENS MAIS USADOS     ");
+        System.out.println("============================\n");
+
+        for (Item item : todosItens) {
             System.out.println("- " + item.getNome() + " (Usado " + item.getTotalUsos() + " vezes)");
         }
     }
 
-    /**
-     * Calcula a SOMA de todas as lavagens de todos os itens.
-     */
-    public void visualizarTotalDeLavagens(List<Item> todosOsItens) {
+    public void visualizarTotalDeLavagens() {
+        List<Item> todosItens = itemDAO.listarTodosItens();
         int totalLavagens = 0;
-        for (Item item : todosOsItens) {
-            // Usando o método padronizado getQuantidadeLavagens()
-            totalLavagens += item.getQuantidadeLavagens();
+        for (Item item : todosItens) {
+            totalLavagens += item.getContadorLavagem();
         }
-        System.out.println("Total de lavagens de todos os itens: " + totalLavagens);
+        System.out.println("Total de lavagens: " + totalLavagens);
     }
 
-    /**
-     * Conta e MOSTRA QUAIS itens estão emprestados.
-     */
-    public void visualizarItensEmprestados(List<Item> todosOsItens) {
+    public void visualizarItensEmprestados() {
+        List<Item> todosItens = itemDAO.listarTodosItens();
         List<Item> itensEmprestados = new ArrayList<>();
-        for (Item item : todosOsItens) {
+
+        for (Item item : todosItens) {
             if (item instanceof IEmprestavel) {
-                IEmprestavel itemEmprestavel = (IEmprestavel) item;
-                if (itemEmprestavel.isEmprestado()) {
+                IEmprestavel emprestavel = (IEmprestavel) item;
+                if (emprestavel.isEmprestado()) {
                     itensEmprestados.add(item);
                 }
             }
         }
 
-        System.out.println("--- Itens Emprestados Atualmente (" + itensEmprestados.size() + ") ---");
-        if (itensEmprestados.isEmpty()) {
-            System.out.println("Nenhum item emprestado no momento.");
+        System.out.println("\n--- Itens emprestados (" + itensEmprestados.size() + ") ---");
+        if (itensEmprestados.size() == 0) {
+            System.out.println("Nenhum item emprestado.");
         } else {
             for (Item item : itensEmprestados) {
                 System.out.println("- " + item.getNome());
@@ -72,86 +73,45 @@ public class Estatisticas {
         }
     }
 
-    /**
-     * Encontra e exibe o look mais utilizado.
-     */
-    public void visualizarLookMaisUsado(List<Look> todosOsLooks) {
-        if (todosOsLooks == null || todosOsLooks.isEmpty()){
+    public void visualizarLookMaisUsado() {
+        List<Look> todosLooks = lookDAO.listarTodosLooks();
+        if (todosLooks == null || todosLooks.size() == 0) {
             System.out.println("Nenhum look para analisar.");
             return;
         }
-        
-        Look lookMaisUsado = todosOsLooks.get(0);
-        int maxUsos = lookMaisUsado.getTotalUsos();
 
-        for (Look look : todosOsLooks) {
-            if (look.getTotalUsos() > maxUsos) {
-                lookMaisUsado = look;
-                maxUsos = look.getTotalUsos();
+        Look lookMaisUsado = todosLooks.get(0);
+        for (int i = 1; i < todosLooks.size(); i++) {
+            if (todosLooks.get(i).getTotalUsos() > lookMaisUsado.getTotalUsos()) {
+                lookMaisUsado = todosLooks.get(i);
             }
         }
-        System.out.println("Look mais usado: " + lookMaisUsado.getNome() + " (usado " + maxUsos + " vezes)");
+
+        System.out.println("Look mais usado: " + lookMaisUsado.getNome() + " (usado " + lookMaisUsado.getTotalUsos() + " vezes)");
     }
-    
-    /**
-     * Calcula a SOMA de todas as utilizações de itens e looks.
-     */
-    public void visualizarQuantidadeDeUtilizacoes(List<Item> todosOsItens, List<Look> todosOsLooks) {
-        int totalItens = 0;
-        int totalLooks = 0;
 
-        for (Item item : todosOsItens) {
-            totalItens += item.getTotalUsos();
-        }
+    public void visualizarItensMaisLavados() {
+        List<Item> todosItens = itemDAO.listarTodosItens();
 
-        for (Look look : todosOsLooks) {
-            totalLooks += look.getTotalUsos();
-        }
-
-        System.out.println("Soma total de utilizações de itens: " + totalItens);
-        System.out.println("Soma total de utilizações de looks: " + totalLooks);
-    }
-    
-    // --- MÉTODO NOVO ADICIONADO ---
-    
-    /**
-     * NOVO: Mostra uma lista dos itens, começando pelo mais lavado.
-     * @param todosOsItens A lista de itens a serem analisados.
-     */
-    public void visualizarItensMaisLavados(List<Item> todosOsItens) {
-        List<Item> copiaDaLista = new ArrayList<>(todosOsItens);
-        List<Item> listaOrdenada = new ArrayList<>();
-
-        // Mesma lógica do "mais usados", mas para lavagens
-        while (!copiaDaLista.isEmpty()) {
-            Item itemMaisLavado = null;
-            
-            // Encontra o primeiro item lavável para iniciar a comparação
-            for(Item item : copiaDaLista){
-                if(item instanceof ILavavel){
-                    itemMaisLavado = item;
-                    break;
+        
+        for (int i = 0; i < todosItens.size() - 1; i++) {
+            for (int j = i + 1; j < todosItens.size(); j++) {
+                if (todosItens.get(j).getContadorLavagem() > todosItens.get(i).getContadorLavagem()) {
+                    Item temp = todosItens.get(i);
+                    todosItens.set(i, todosItens.get(j));
+                    todosItens.set(j, temp);
                 }
             }
-
-            // Se não encontrar nenhum item lavável, para o loop
-            if(itemMaisLavado == null) break;
-
-
-            // Procura na lista por um item que tenha sido mais lavado
-            for (Item itemAtual : copiaDaLista) {
-                if (itemAtual.getQuantidadeLavagens() > itemMaisLavado.getQuantidadeLavagens()) {
-                    itemMaisLavado = itemAtual;
-                }
-            }
-
-            listaOrdenada.add(itemMaisLavado);
-            copiaDaLista.remove(itemMaisLavado);
         }
-        
-        System.out.println("--- Itens por Ordem de Lavagens ---");
-        for(Item item : listaOrdenada) {
-            System.out.println("- " + item.getNome() + " (Lavado " + item.getQuantidadeLavagens() + " vezes)");
+        System.out.println("\n============================");
+        System.out.println("\n ITENS MAIS LAVADOS         ");
+        System.out.println("\n============================");
+
+
+        for (Item item : todosItens) {
+            if (item instanceof modelo.interfaces.ILavavel) {
+                System.out.println("- " + item.getNome() + " (Lavado " + item.getContadorLavagem() + " vezes)");
+            }
         }
     }
 }

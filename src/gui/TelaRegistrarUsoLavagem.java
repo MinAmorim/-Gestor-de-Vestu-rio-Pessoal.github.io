@@ -5,34 +5,42 @@ import java.awt.*;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.List;
 import java.util.Vector;
-import modelo.Pessoa;
 import modelo.Look;
 import modelo.Item;
 import modelo.interfaces.ILavavel;
-// --- IMPORTAÇÕES ADICIONADAS AQUI ---
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
-
+import persistencia.ItemDAO;
+import persistencia.LookDAO;
 
 public class TelaRegistrarUsoLavagem extends JFrame {
+    private static final Color COR_FUNDO = new Color(255, 223, 229);
 
-    private Pessoa pessoa;
 
-    public TelaRegistrarUsoLavagem(Pessoa pessoa) {
-        this.pessoa = pessoa;
+    private LookDAO lookDAO;
+    private ItemDAO itemDAO;
+
+    private JComboBox<Look> comboLooks;
+    private JList<Item> listaItensLavaveis;
+    private DefaultListModel<Item> modeloLista;
+
+    public TelaRegistrarUsoLavagem() { 
+        this.lookDAO = new LookDAO();
+        this.itemDAO = new ItemDAO();
 
         setTitle("Registrar Uso e Lavagem");
         setSize(800, 500);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
         setLayout(new GridLayout(1, 2, 10, 10));
+        getContentPane().setBackground(COR_FUNDO);
+        setLayout(new GridBagLayout());
+        
 
-        // --- PAINEL DA ESQUERDA: REGISTRAR USO DE LOOK ---
         JPanel painelUso = new JPanel(new BorderLayout(10, 10));
         painelUso.setBorder(BorderFactory.createTitledBorder("Registrar Uso de Look"));
 
-        JComboBox<Look> comboLooks = criarComboLooks();
+        comboLooks = criarComboLooks();
         JTextField txtData = new JTextField(LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
         JComboBox<String> comboPeriodo = new JComboBox<>(new String[]{"Manhã", "Tarde", "Noite"});
         JTextField txtOcasiao = new JTextField();
@@ -53,11 +61,10 @@ public class TelaRegistrarUsoLavagem extends JFrame {
         
         add(painelUso);
 
-        // --- PAINEL DA DIREITA: REGISTRAR LAVAGEM DE ITENS ---
         JPanel painelLavagem = new JPanel(new BorderLayout(10, 10));
         painelLavagem.setBorder(BorderFactory.createTitledBorder("Registrar Lavagem de Itens"));
 
-        JList<Item> listaItensLavaveis = criarListaLavagem();
+        listaItensLavaveis = criarListaLavagem();
         JButton btnLavar = new JButton("Lavar Itens Selecionados");
 
         painelLavagem.add(new JLabel("Selecione os itens para lavar:"), BorderLayout.NORTH);
@@ -66,81 +73,83 @@ public class TelaRegistrarUsoLavagem extends JFrame {
 
         add(painelLavagem);
 
-        // --- AÇÕES DOS BOTÕES ---
+
         btnRegistrarUso.addActionListener(_ -> {
             Look lookSelecionado = (Look) comboLooks.getSelectedItem();
             String dataTexto = txtData.getText();
             String periodo = (String) comboPeriodo.getSelectedItem();
-            String ocasiao = txtOcasiao.getText();
+            String ocasiao = txtOcasiao.getText().trim();
 
             if (lookSelecionado == null) {
-                JOptionPane.showMessageDialog(this, "Por favor, selecione um look.", "Erro", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Por favor, selecione um look.",
+                "Erro", JOptionPane.ERROR_MESSAGE);
                 return;
             }
             if (ocasiao.isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Por favor, defina a ocasião.", "Erro", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Por favor, defina a ocasião.",
+                "Erro", JOptionPane.ERROR_MESSAGE);
                 return;
             }
             
+            // Check for borrowed items in the selected look
+            for (Item item : lookSelecionado.listarItensDoLook()) {
+                if (item != null && item.isEmprestado()) {
+                    JOptionPane.showMessageDialog(this, "O look '" + lookSelecionado.getNome() + "' não pode ser usado porque o item '" + item.getNome() + "' está emprestado para '" + item.getParaQuemEstaEmprestado() + "'.",
+                    "Erro: Item Emprestado", JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+            }
+
             LocalDate dataUso;
             try {
                 dataUso = LocalDate.parse(dataTexto, DateTimeFormatter.ofPattern("dd/MM/yyyy"));
             } catch (DateTimeParseException ex) {
-                JOptionPane.showMessageDialog(this, "Formato de data inválido. Use dd/mm/aaaa.", "Erro na Data", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Formato de data inválido. Use dd/mm/aaaa.",
+                "Erro na Data", JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
+            itemDAO.registrarUso(lookSelecionado.listarItensDoLook());
+            
             String ocasiaoCompleta = ocasiao + " (" + periodo + ")";
+            lookDAO.registrarUsoLook(lookSelecionado, dataUso, ocasiaoCompleta);
             
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            PrintStream ps = new PrintStream(baos);
-            PrintStream old = System.out;
-            System.setOut(ps);
-
-            lookSelecionado.registrarUso(dataUso, ocasiaoCompleta);
+            JOptionPane.showMessageDialog(this, "Uso do look '" + lookSelecionado.getNome() + "' registrado com sucesso!");
             
-            System.out.flush();
-            System.setOut(old);
-            
-            String mensagemModelo = baos.toString().trim();
-            if (!mensagemModelo.isEmpty() && mensagemModelo.contains("⚠️")) {
-                 JOptionPane.showMessageDialog(this, mensagemModelo, "Aviso", JOptionPane.WARNING_MESSAGE);
-            } else {
-                 JOptionPane.showMessageDialog(this, "Uso do look '" + lookSelecionado.getNome() + "' registrado com sucesso!");
-            }
-            
-            listaItensLavaveis.repaint();
+            atualizarListaLavagem();
         });
 
         btnLavar.addActionListener(_ -> {
-            java.util.List<Item> itensSelecionados = listaItensLavaveis.getSelectedValuesList();
+            List<Item> itensSelecionados = listaItensLavaveis.getSelectedValuesList();
             if (itensSelecionados.isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Selecione um ou mais itens para lavar.", "Nenhum item selecionado", JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Selecione um ou mais itens para lavar.",
+                "Nenhum item selecionado", JOptionPane.WARNING_MESSAGE);
                 return;
             }
-            
-            int itensRealmenteLavados = 0;
-            for (Item item : itensSelecionados) {
-                if (!item.isLimpo()) {
-                    item.registrarLavagem();
-                    itensRealmenteLavados++;
-                }
-            }
 
-            if (itensRealmenteLavados > 0) {
-                JOptionPane.showMessageDialog(this, itensRealmenteLavados + " item(ns) lavado(s) com sucesso!");
-            } else {
-                JOptionPane.showMessageDialog(this, "Nenhum item foi lavado, pois todos os selecionados já estavam limpos.", "Aviso", JOptionPane.INFORMATION_MESSAGE);
-            }
+            List<Item> itensParaLavar = itensSelecionados.stream()
+                .filter(item -> !item.isLimpo())
+                .toList();
+
+
+            if (itensParaLavar.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "O item selecionado já está limpo.", 
+            "", JOptionPane.INFORMATION_MESSAGE);
+            return;
+    }
             
-            listaItensLavaveis.repaint(); 
+            itemDAO.registrarLavagem(itensSelecionados);
+
+            JOptionPane.showMessageDialog(this, itensSelecionados.size() + " item(ns) lavado(s) com sucesso!");
+            
+            atualizarListaLavagem();
         });
     }
 
     private JComboBox<Look> criarComboLooks() {
-        Vector<Look> looksDisponiveis = new Vector<>(pessoa.getLooks());
-        JComboBox<Look> comboLooks = new JComboBox<>(looksDisponiveis);
-        comboLooks.setRenderer(new DefaultListCellRenderer() {
+        Vector<Look> looksDisponiveis = new Vector<>(lookDAO.listarTodosLooks());
+        JComboBox<Look> combo = new JComboBox<>(looksDisponiveis);
+        combo.setRenderer(new DefaultListCellRenderer() {
             @Override
             public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
                 super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
@@ -150,18 +159,14 @@ public class TelaRegistrarUsoLavagem extends JFrame {
                 return this;
             }
         });
-        return comboLooks;
+        return combo;
     }
 
     private JList<Item> criarListaLavagem() {
-        DefaultListModel<Item> modeloLista = new DefaultListModel<>();
-        pessoa.getGuardaRoupa().stream()
-            .filter(item -> item instanceof ILavavel)
-            .forEach(modeloLista::addElement);
-
-        JList<Item> listaItensLavaveis = new JList<>(modeloLista);
-        listaItensLavaveis.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
-        listaItensLavaveis.setCellRenderer(new DefaultListCellRenderer() {
+        modeloLista = new DefaultListModel<>();
+        JList<Item> lista = new JList<>(modeloLista);
+        lista.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+        lista.setCellRenderer(new DefaultListCellRenderer() {
             @Override
             public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
                 super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
@@ -173,6 +178,15 @@ public class TelaRegistrarUsoLavagem extends JFrame {
                 return this;
             }
         });
-        return listaItensLavaveis;
+        
+        atualizarListaLavagem(); 
+        return lista;
+    }
+
+    private void atualizarListaLavagem() {
+        modeloLista.clear();
+        itemDAO.listarTodosItens().stream()
+            .filter(item -> item instanceof ILavavel)
+            .forEach(modeloLista::addElement);
     }
 }

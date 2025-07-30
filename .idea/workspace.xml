@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="5654d852-21f3-4b21-9ef6-cd5a4b2b89d3" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/src/estatisticas/Estatisticas.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/estatisticas/Estatisticas.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/gui/TelaAdicionarItem.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/gui/TelaAdicionarItem.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/gui/TelaCriarLook.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/gui/TelaCriarLook.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/gui/TelaEditarItem.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/gui/TelaEditarItem.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/gui/TelaEditarLook.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/gui/TelaEditarLook.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/gui/TelaEstatisticas.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/gui/TelaEstatisticas.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/gui/TelaGerenciarItens.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/gui/TelaGerenciarItens.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/gui/TelaGerenciarLooks.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/gui/TelaGerenciarLooks.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/gui/TelaInicial.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/gui/TelaInicial.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/gui/TelaPrincipal.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/gui/TelaPrincipal.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/gui/TelaRegistrarUsoLavagem.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/gui/TelaRegistrarUsoLavagem.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/modelo/Item.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/modelo/Item.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/modelo/Lavagem.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/modelo/Lavagem.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/modelo/Look.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/modelo/Look.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/modelo/Main.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/modelo/Pessoa.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/modelo/Pessoa.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/modelo/UtilizacaoLook.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/modelo/UtilizacaoLook.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/modelo/interfaces/IEmprestavel.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/modelo/interfaces/IEmprestavel.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/modelo/subclasses/Acessorios.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/modelo/subclasses/Acessorios.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/modelo/subclasses/LavavelandEmpresta.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/modelo/subclasses/LavavelandEmpresta.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/modelo/subclasses/RoupaIntima.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/modelo/subclasses/RoupaIntima.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/modelo/subclasses/acessorios/Pulseira.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/modelo/subclasses/acessorios/Relogio.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/modelo/subclasses/roupasdiaadia/Calcado.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/modelo/subclasses/roupasdiaadia/Calcado.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/modelo/subclasses/roupasdiaadia/Inferior.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/modelo/subclasses/roupasdiaadia/Inferior.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/modelo/subclasses/roupasdiaadia/Superior.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/modelo/subclasses/roupasdiaadia/Superior.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/modelo/subclasses/roupasdiaadia/inferior/Bermuda.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/modelo/subclasses/roupasdiaadia/inferior/Calca.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/modelo/subclasses/roupasdiaadia/superior/Camisa.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/modelo/subclasses/roupasdiaadia/superior/Regata.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/modelo/subclasses/roupasintimas/Calcinha.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/modelo/subclasses/roupasintimas/Cueca.java" beforeDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="ProjectColorInfo"><![CDATA[{
+  "associatedIndex": 0
+}]]></component>
+  <component name="ProjectId" id="30EqG1fLGvhyBltEDkdvIXkdp28" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "git-widget-placeholder": "main",
+    "nodejs_package_manager_path": "npm",
+    "vue.rearranger.settings.migration": "true"
+  }
+}]]></component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-jdk-9823dce3aa75-fbdcb00ec9e3-intellij.indexing.shared.core-IU-251.26927.53" />
+        <option value="bundled-js-predefined-d6986cc7102b-09060db00ec0-JavaScript-IU-251.26927.53" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="5654d852-21f3-4b21-9ef6-cd5a4b2b89d3" name="Changes" comment="" />
+      <created>1753202980778</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1753202980778</updated>
+      <workItem from="1753202981995" duration="86000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+</project>

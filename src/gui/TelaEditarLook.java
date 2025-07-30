@@ -3,7 +3,6 @@ package gui;
 import javax.swing.*;
 import java.awt.*;
 import java.util.Vector;
-import modelo.Pessoa;
 import modelo.Look;
 import modelo.Item;
 import modelo.subclasses.Acessorios;
@@ -11,12 +10,14 @@ import modelo.subclasses.RoupaIntima;
 import modelo.subclasses.roupasdiaadia.Calcado;
 import modelo.subclasses.roupasdiaadia.Inferior;
 import modelo.subclasses.roupasdiaadia.Superior;
+import persistencia.ItemDAO;
+import persistencia.LookDAO;
 
 public class TelaEditarLook extends JDialog {
 
-    private Pessoa pessoa;
     private Look lookParaEditar;
     private TelaGerenciarLooks telaPai;
+    private ItemDAO itemDAO;
 
     private JTextField txtNomeLook;
     private JComboBox<Superior> comboSuperior;
@@ -25,11 +26,11 @@ public class TelaEditarLook extends JDialog {
     private JComboBox<Acessorios> comboAcessorios;
     private JComboBox<RoupaIntima> comboRoupaIntima;
 
-    public TelaEditarLook(TelaGerenciarLooks telaPai, Pessoa pessoa, Look look) {
+    public TelaEditarLook(TelaGerenciarLooks telaPai, Look look) {
         super(telaPai, "Editar Look", true);
         this.telaPai = telaPai;
-        this.pessoa = pessoa;
         this.lookParaEditar = look;
+        this.itemDAO = new ItemDAO();
 
         setSize(500, 400);
         setLocationRelativeTo(telaPai);
@@ -57,20 +58,32 @@ public class TelaEditarLook extends JDialog {
         painelFormulario.add(comboAcessorios);
         painelFormulario.add(new JLabel("Roupa Íntima:"));
         painelFormulario.add(comboRoupaIntima);
-        
+
         add(painelFormulario, BorderLayout.CENTER);
 
         JPanel painelBotoes = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         JButton btnSalvar = new JButton("Salvar Alterações");
         JButton btnCancelar = new JButton("Cancelar");
+
         painelBotoes.add(btnSalvar);
         painelBotoes.add(btnCancelar);
         add(painelBotoes, BorderLayout.SOUTH);
 
         preencherFormulario();
 
-        btnSalvar.addActionListener(_ -> salvarAlteracoes());
-        btnCancelar.addActionListener(_ -> dispose());
+        btnSalvar.addActionListener(new java.awt.event.ActionListener() {
+            @Override
+            public void actionPerformed(java.awt.event.ActionEvent e) {
+                salvarAlteracoes();
+            }
+        });
+
+        btnCancelar.addActionListener(new java.awt.event.ActionListener() {
+            @Override
+            public void actionPerformed(java.awt.event.ActionEvent e) {
+                dispose();
+            }
+        });
     }
 
     private void preencherFormulario() {
@@ -85,14 +98,15 @@ public class TelaEditarLook extends JDialog {
     private <T extends Item> JComboBox<T> criarComboBox(Class<T> tipo) {
         Vector<T> itensFiltrados = new Vector<>();
         itensFiltrados.add(null);
-        
-        pessoa.getGuardaRoupa().stream()
-            .filter(tipo::isInstance)
-            .map(tipo::cast)
-            .forEach(itensFiltrados::add);
-            
+
+        for (Item item : itemDAO.listarTodosItens()) {
+            if (tipo.isInstance(item)) {
+                itensFiltrados.add(tipo.cast(item));
+            }
+        }
+
         JComboBox<T> comboBox = new JComboBox<>(itensFiltrados);
-        
+
         comboBox.setRenderer(new DefaultListCellRenderer() {
             @Override
             public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
@@ -109,17 +123,19 @@ public class TelaEditarLook extends JDialog {
     }
 
     private void salvarAlteracoes() {
-        String nomeLook = txtNomeLook.getText();
+        String nomeLook = txtNomeLook.getText().trim();
         Superior superior = (Superior) comboSuperior.getSelectedItem();
         Inferior inferior = (Inferior) comboInferior.getSelectedItem();
         Calcado calcado = (Calcado) comboCalcado.getSelectedItem();
 
         if (nomeLook.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "O nome do look é obrigatório.", "Erro", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "O nome do look é obrigatório.",
+            "", JOptionPane.ERROR_MESSAGE);
             return;
         }
         if (superior == null || inferior == null || calcado == null) {
-            JOptionPane.showMessageDialog(this, "Um look deve ter, no mínimo, peça superior, inferior e calçado.", "Erro", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Um look deve ter no mínimo  uma peça superior, inferior e calçado.",
+            "", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
@@ -130,8 +146,12 @@ public class TelaEditarLook extends JDialog {
         lookParaEditar.setAcessorios((Acessorios) comboAcessorios.getSelectedItem());
         lookParaEditar.setRoupaIntima((RoupaIntima) comboRoupaIntima.getSelectedItem());
 
-        telaPai.atualizarTabela();
+        LookDAO lookDAO = new LookDAO();
+        lookDAO.atualizarLook(lookParaEditar);
+
+        telaPai.carregarLooks(); 
         dispose();
-        JOptionPane.showMessageDialog(telaPai, "Look '" + nomeLook + "' atualizado com sucesso!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+        JOptionPane.showMessageDialog(telaPai, "Look '" + nomeLook + "' atualizado com sucesso!",
+        "", JOptionPane.INFORMATION_MESSAGE);
     }
 }

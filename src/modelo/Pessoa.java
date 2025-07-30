@@ -16,7 +16,6 @@ public class Pessoa implements Serializable {
         this.looks = new ArrayList<>();
     }
 
-    // --- MÉTODOS PARA GERIR ITENS ---
     public void adicionarItem(Item item) {
         this.guardaRoupa.add(item);
     }
@@ -27,7 +26,6 @@ public class Pessoa implements Serializable {
         }
     }
 
-    // --- MÉTODOS PARA GERIR LOOKS ---
     public void adicionarLook(Look look) {
         this.looks.add(look);
     }
@@ -36,7 +34,6 @@ public class Pessoa implements Serializable {
         this.looks.remove(look);
     }
     
-    // Método para remover look pelo índice (essencial para a GUI)
     public void removerLook(int index) {
         if (index >= 0 && index < this.looks.size()) {
             this.looks.remove(index);
@@ -44,7 +41,6 @@ public class Pessoa implements Serializable {
     }
 
 
-    // --- GETTERS ---
     public String getNome() {
         return nome;
     }

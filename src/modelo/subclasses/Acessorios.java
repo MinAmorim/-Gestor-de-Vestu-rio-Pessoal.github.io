@@ -2,31 +2,43 @@ package modelo.subclasses;
 
 import java.time.LocalDate;
 
+import modelo.EstadoConservacao;
 import modelo.Item;
 import modelo.interfaces.IEmprestavel;
 
-public abstract class Acessorios extends Item implements IEmprestavel{
+public class Acessorios extends Item implements IEmprestavel {
 
-    private LocalDate dataEmprestimo; // Mudar tipo
+    private String tipo; 
+    private LocalDate dataEmprestimo;
     private LocalDate dataDevolucao;
     private boolean isEmprestado;
+    private String paraQuemEstaEmprestado;
 
-    public Acessorios (String nome, String cor, String tamanho, String loja, String conservacao){
-    super(nome, cor, tamanho, loja, conservacao);
-}
+    public Acessorios(String tipo, String nome, String cor, String tamanho, String loja, EstadoConservacao conservacao) {
+        super(nome, cor, tamanho, loja, conservacao);
+        this.tipo = tipo; 
+        this.isEmprestado = false;
+        this.paraQuemEstaEmprestado = null;
+    }
+
     @Override
-    public void registrarEmprestimo() {
+    public String getTipo() {
+        return this.tipo; 
+    }
+
+
+    @Override
+    public void registrarEmprestimo(String paraQuem) {
         this.dataEmprestimo = LocalDate.now();
         this.isEmprestado = true;
-
+        this.paraQuemEstaEmprestado = paraQuem;
     }
 
     @Override
     public void registrarDevolucao() {
         this.dataDevolucao = LocalDate.now();
         this.isEmprestado = false;
-
-
+        this.paraQuemEstaEmprestado = null;
     }
 
     @Override
@@ -34,7 +46,6 @@ public abstract class Acessorios extends Item implements IEmprestavel{
         if (dataEmprestimo == null) return 0;
 
         LocalDate hoje = LocalDate.now();
-
         int anoAtual = hoje.getYear();
         int mesAtual = hoje.getMonthValue();
         int diaAtual = hoje.getDayOfMonth();
@@ -49,16 +60,24 @@ public abstract class Acessorios extends Item implements IEmprestavel{
         int diasDia = diaAtual - diaEmp;
 
         return diasAno + diasMes + diasDia;
-
     }
 
-public boolean isEmprestado(){
-    return isEmprestado;
-}
-public LocalDate getDataEmprestimo(){
-    return dataEmprestimo;
-}
-public LocalDate getDataDevolucao(){
-    return dataDevolucao;
-}
-}
+    @Override
+    public boolean isEmprestado() {
+        return isEmprestado;
+    }
+    
+    public LocalDate getDataEmprestimo() {
+        return dataEmprestimo;
+    }
+    
+    public LocalDate getDataDevolucao() {
+        return dataDevolucao;
+    }
+
+        @Override
+        public String getParaQuemEstaEmprestado(){
+            return this.paraQuemEstaEmprestado;
+        }
+
+}        

@@ -2,14 +2,11 @@ package modelo;
 
 import java.time.LocalDate;
 
-/**
- * Classe simples para armazenar os dados de uma utilização de Look.
- * Segue o padrão de ser um objeto de dados (POJO).
- */
+
 public class UtilizacaoLook {
     private final LocalDate data;
-    private final String periodo; // Ex: "Manhã", "Tarde", "Noite"
-    private final String ocasiao; // Ex: "Aniversário da Maria", "Trabalho"
+    private final String periodo; 
+    private final String ocasiao; 
 
     public UtilizacaoLook(LocalDate data, String periodo, String ocasiao) {
         this.data = data;
@@ -17,7 +14,6 @@ public class UtilizacaoLook {
         this.ocasiao = ocasiao;
     }
 
-    // Getters para acessar os dados
     public LocalDate getData() {
         return data;
     }
