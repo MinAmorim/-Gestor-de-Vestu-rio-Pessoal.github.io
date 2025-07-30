@@ -3,20 +3,21 @@ package gui;
 import javax.swing.*;
 import java.awt.*;
 import modelo.Pessoa;
-// Importe todas as suas classes de itens concretos
-import modelo.subclasses.acessorios.*;
-import modelo.subclasses.roupasdiaadia.calcado.*;
-import modelo.subclasses.roupasdiaadia.inferior.*;
-import modelo.subclasses.roupasdiaadia.superior.*;
-import modelo.subclasses.roupasintimas.*;
+// Importe as classes de CATEGORIA agora
+import modelo.subclasses.Acessorios;
+import modelo.subclasses.RoupaIntima;
+import modelo.subclasses.roupasdiaadia.Calcado;
+import modelo.subclasses.roupasdiaadia.Inferior;
+import modelo.subclasses.roupasdiaadia.Superior;
 
 public class TelaAdicionarItem extends JDialog {
 
     private Pessoa pessoa;
-    private TelaGerenciarItens telaPai; // Referência para a tela que a chamou
+    private TelaGerenciarItens telaPai;
 
-    // Campos do formulário
-    private JComboBox<String> comboTipo;
+    // Campos do formulário atualizados
+    private JComboBox<String> comboCategoria; // NOVO: para escolher a categoria
+    private JTextField txtTipo;             // NOVO: para escrever o tipo
     private JTextField txtNome;
     private JTextField txtCor;
     private JTextField txtTamanho;
@@ -25,24 +26,22 @@ public class TelaAdicionarItem extends JDialog {
     private JTextField txtImagem;
 
     public TelaAdicionarItem(TelaGerenciarItens telaPai, Pessoa pessoa) {
-        super(telaPai, "Adicionar Novo Item", true); // O 'true' torna o diálogo modal
+        super(telaPai, "Adicionar Novo Item", true);
         this.telaPai = telaPai;
         this.pessoa = pessoa;
 
-        setSize(400, 500);
+        setSize(400, 550); // Aumentar um pouco a altura
         setLocationRelativeTo(telaPai);
         setLayout(new BorderLayout(10, 10));
 
-        // --- Painel do Formulário ---
-        JPanel painelFormulario = new JPanel(new GridLayout(7, 2, 5, 5));
+        JPanel painelFormulario = new JPanel(new GridLayout(8, 2, 5, 5)); // 8 linhas agora
         painelFormulario.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-        // Tipos de itens disponíveis para seleção
-        String[] tipos = {
-            "Camisa", "Regata", "Calca", "Bermuda", "Sapato",
-            "Relogio", "Pulseira", "Calcinha", "Cueca"
-        };
-        comboTipo = new JComboBox<>(tipos);
+        // Lista de categorias disponíveis
+        String[] categorias = {"Peça Superior", "Peça Inferior", "Calçado", "Acessório", "Roupa Íntima"};
+        comboCategoria = new JComboBox<>(categorias);
+        
+        txtTipo = new JTextField();
         txtNome = new JTextField();
         txtCor = new JTextField();
         txtTamanho = new JTextField();
@@ -50,9 +49,11 @@ public class TelaAdicionarItem extends JDialog {
         txtConservacao = new JTextField();
         txtImagem = new JTextField();
 
-        painelFormulario.add(new JLabel("Tipo de Item:"));
-        painelFormulario.add(comboTipo);
-        painelFormulario.add(new JLabel("Nome:"));
+        painelFormulario.add(new JLabel("Categoria do Item:"));
+        painelFormulario.add(comboCategoria);
+        painelFormulario.add(new JLabel("Tipo Específico (ex: Camisa):"));
+        painelFormulario.add(txtTipo);
+        painelFormulario.add(new JLabel("Nome/Descrição:"));
         painelFormulario.add(txtNome);
         painelFormulario.add(new JLabel("Cor:"));
         painelFormulario.add(txtCor);
@@ -67,70 +68,53 @@ public class TelaAdicionarItem extends JDialog {
         
         add(painelFormulario, BorderLayout.CENTER);
 
-        // --- Botões de Ação ---
         JPanel painelBotoes = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         JButton btnSalvar = new JButton("Salvar");
         JButton btnCancelar = new JButton("Cancelar");
-
         painelBotoes.add(btnSalvar);
         painelBotoes.add(btnCancelar);
         add(painelBotoes, BorderLayout.SOUTH);
 
-        // --- Ações dos Botões ---
         btnSalvar.addActionListener(_ -> salvarItem());
-        btnCancelar.addActionListener(_ -> dispose()); // 'dispose' fecha o JDialog
+        btnCancelar.addActionListener(_ -> dispose());
     }
 
     private void salvarItem() {
-        // 1. Coletar os dados dos campos
-        String tipo = (String) comboTipo.getSelectedItem();
+        // Coleta dos dados
+        String categoria = (String) comboCategoria.getSelectedItem();
+        String tipo = txtTipo.getText();
         String nome = txtNome.getText();
         String cor = txtCor.getText();
         String tamanho = txtTamanho.getText();
         String loja = txtLoja.getText();
         String conservacao = txtConservacao.getText();
+        String imagem = txtImagem.getText();
 
-        // 2. Validar se os campos não estão vazios (validação simples)
-        if (nome.isEmpty() || cor.isEmpty() || tamanho.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Nome, Cor e Tamanho são campos obrigatórios.", "Erro de Validação", JOptionPane.ERROR_MESSAGE);
+        if (tipo.isEmpty() || nome.isEmpty() || cor.isEmpty() || tamanho.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Tipo, Nome, Cor e Tamanho são campos obrigatórios.", "Erro de Validação", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
-        // 3. Criar o objeto do item correto com base no tipo selecionado
-        switch (tipo) {
-            case "Camisa":
-                pessoa.adicionarItem(new Camisa(nome, cor, tamanho, loja, conservacao));
+        // Cria o objeto da CATEGORIA correta, passando o TIPO como texto
+        switch (categoria) {
+            case "Peça Superior":
+                pessoa.adicionarItem(new Superior(tipo, nome, cor, tamanho, loja, conservacao));
                 break;
-            case "Regata":
-                pessoa.adicionarItem(new Regata(nome, cor, tamanho, loja, conservacao));
+            case "Peça Inferior":
+                pessoa.adicionarItem(new Inferior(tipo, nome, cor, tamanho, loja, conservacao));
                 break;
-            case "Calca":
-                pessoa.adicionarItem(new Calca(nome, cor, tamanho, loja, conservacao));
+            case "Calçado":
+                pessoa.adicionarItem(new Calcado(tipo, nome, cor, tamanho, loja, conservacao));
                 break;
-            case "Bermuda":
-                pessoa.adicionarItem(new Bermuda(nome, cor, tamanho, loja, conservacao));
+            case "Acessório":
+                pessoa.adicionarItem(new Acessorios(tipo, nome, cor, tamanho, loja, conservacao));
                 break;
-            case "Sapato":
-                pessoa.adicionarItem(new Sapato(nome, cor, tamanho, loja, conservacao));
-                break;
-            case "Relogio":
-                pessoa.adicionarItem(new Relogio(nome, cor, tamanho, loja, conservacao));
-                break;
-            case "Pulseira":
-                pessoa.adicionarItem(new Pulseira(nome, cor, tamanho, loja, conservacao));
-                break;
-            case "Calcinha":
-                pessoa.adicionarItem(new Calcinha(nome, cor, tamanho, loja, conservacao));
-                break;
-            case "Cueca":
-                pessoa.adicionarItem(new Cueca(nome, cor, tamanho, loja, conservacao));
+            case "Roupa Íntima":
+                pessoa.adicionarItem(new RoupaIntima(tipo, nome, cor, tamanho, loja, conservacao));
                 break;
         }
 
-        // 4. Avisar a tela pai para atualizar a tabela
         telaPai.atualizarTabela();
-        
-        // 5. Fechar a janela de adicionar item
         dispose();
         JOptionPane.showMessageDialog(telaPai, "Item salvo com sucesso!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
     }

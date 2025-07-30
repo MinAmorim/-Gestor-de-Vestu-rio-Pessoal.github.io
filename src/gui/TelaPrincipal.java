@@ -6,9 +6,11 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import modelo.Pessoa;
 import modelo.Look;
-import modelo.subclasses.roupasdiaadia.calcado.Sapato;
-import modelo.subclasses.roupasdiaadia.inferior.Calca;
-import modelo.subclasses.roupasdiaadia.superior.Camisa;
+// --- IMPORTAÇÕES ATUALIZADAS ---
+// Importamos as classes de categoria, não mais as específicas
+import modelo.subclasses.roupasdiaadia.Calcado;
+import modelo.subclasses.roupasdiaadia.Inferior;
+import modelo.subclasses.roupasdiaadia.Superior;
 
 public class TelaPrincipal extends JFrame {
 
@@ -24,7 +26,7 @@ public class TelaPrincipal extends JFrame {
         carregarDadosDeExemplo();
 
         setTitle("Guarda-Roupa Virtual");
-        setSize(500, 650); // Aumentei um pouco a altura para caber melhor o rodapé
+        setSize(500, 650);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         getContentPane().setBackground(COR_FUNDO);
@@ -42,10 +44,8 @@ public class TelaPrincipal extends JFrame {
         gbc.anchor = GridBagConstraints.CENTER;
         add(lblTitulo, gbc);
 
-        // --- PAINEL PARA OS BOTÕES ---
-        // Usar um painel separado para os botões dá mais controle sobre o layout
-        JPanel painelBotoes = new JPanel(new GridLayout(5, 1, 0, 15)); // 5 linhas, 1 coluna, espaçamento vertical de 15
-        painelBotoes.setOpaque(false); // Deixa o painel transparente para mostrar o fundo da janela
+        JPanel painelBotoes = new JPanel(new GridLayout(5, 1, 0, 15));
+        painelBotoes.setOpaque(false);
 
         String[] textosBotoes = {
             "° Gerenciar Itens",
@@ -59,11 +59,9 @@ public class TelaPrincipal extends JFrame {
             JButton botao = criarBotaoEstilizado(texto);
             final String acao = texto.substring(2);
 
-            // Adiciona a ação correta para cada botão
             botao.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    // Usando um switch-case que é mais limpo e seguro para múltiplas opções
                     switch (acao) {
                         case "Gerenciar Itens":
                             TelaGerenciarItens telaItens = new TelaGerenciarItens(pessoa);
@@ -91,10 +89,16 @@ public class TelaPrincipal extends JFrame {
         }
 
         gbc.gridy = 1;
-        gbc.weighty = 0.8; // Faz o painel de botões ocupar a maior parte do espaço
+        gbc.weighty = 0.8;
         add(painelBotoes, gbc);
 
-        
+        JLabel lblRodape = new JLabel("Desenvolvido por [Seu Nome]");
+        lblRodape.setFont(new Font("SansSerif", Font.PLAIN, 12));
+        lblRodape.setForeground(Color.DARK_GRAY);
+        gbc.gridy = 2;
+        gbc.weighty = 0.1;
+        gbc.anchor = GridBagConstraints.PAGE_END;
+        add(lblRodape, gbc);
     }
 
     private JButton criarBotaoEstilizado(String texto) {
@@ -108,25 +112,32 @@ public class TelaPrincipal extends JFrame {
         return botao;
     }
 
+    /**
+     * Carrega dados de exemplo usando os novos construtores generalizados.
+     */
     private void carregarDadosDeExemplo() {
-        Camisa camisa = new Camisa("Camisa Social", "Branca", "M", "Riachuelo", "Boa");
+        // --- MÉTODO ATUALIZADO ---
+        // Agora criamos um objeto 'Superior' e dizemos que o seu tipo é "Camisa"
+        Superior camisa = new Superior("Camisa", "Camisa Social Branca", "Branca", "M", "Riachuelo", "Boa");
         camisa.registrarUso();
         camisa.registrarUso();
         camisa.registrarLavagem();
         
-        Calca calca = new Calca("Jeans Skinny", "Azul", "40", "Renner", "Ótima");
+        // Criamos um objeto 'Inferior' e dizemos que o seu tipo é "Calça Jeans"
+        Inferior calca = new Inferior("Calça Jeans", "Jeans Skinny", "Azul", "40", "Renner", "Ótima");
         calca.registrarUso();
 
-        Sapato sapato = new Sapato("Tênis Corrida", "Preto", "41", "Nike", "Nova");
-        sapato.registrarUso();
-        sapato.registrarUso();
-        sapato.registrarUso();
+        // Criamos um objeto 'Calcado' e dizemos que o seu tipo é "Tênis"
+        Calcado tenis = new Calcado("Tênis", "Tênis de Corrida", "Preto", "41", "Nike", "Nova");
+        tenis.registrarUso();
+        tenis.registrarUso();
+        tenis.registrarUso();
         
         pessoa.adicionarItem(camisa);
         pessoa.adicionarItem(calca);
-        pessoa.adicionarItem(sapato);
+        pessoa.adicionarItem(tenis);
 
-        Look lookCasual = new Look("Look do Dia a Dia", sapato, calca, camisa);
+        Look lookCasual = new Look("Look do Dia a Dia", tenis, calca, camisa);
         pessoa.adicionarLook(lookCasual);
     }
 
